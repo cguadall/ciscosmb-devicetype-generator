@@ -3,6 +3,7 @@
 import csv
 import re
 import os
+import argparse
 
 try:
     import yaml
@@ -26,6 +27,40 @@ def slugify(s):
     s = re.sub(r'[^a-z0-9]+', '-', s)
     s = re.sub(r'-+', '-', s)
     return s.strip('-')
+
+
+SERIES_META = {
+    '1200': {
+        'prefix': 'C1200',
+        'label': 'Catalyst 1200',
+        'datasheet_url': 'https://www.cisco.com/c/en/us/products/collateral/switches/catalyst-1200-series-switches/nb-06-cat1200-ser-data-sheet-cte-en.html',
+    },
+    '1300': {
+        'prefix': 'C1300',
+        'label': 'Catalyst 1300',
+        'datasheet_url': 'https://www.cisco.com/c/en/us/products/collateral/switches/catalyst-1300-series-switches/nb-06-cat1300-ser-data-sheet-cte-en.html',
+    },
+    'cbs250': {
+        'prefix': 'CBS250',
+        'label': 'CBS250',
+        'datasheet_url': 'https://www.cisco.com/c/en/us/products/collateral/switches/business-250-series-smart-switches/cbs250-ds.html',
+    },
+    'cbs350': {
+        'prefix': 'CBS350',
+        'label': 'CBS350',
+        'datasheet_url': 'https://www.cisco.com/c/en/us/products/collateral/switches/business-350-series-managed-switches/cbs350-ds.html',
+    },
+}
+
+
+def get_series_metadata(model, default_series='1300'):
+    model_upper = model.upper()
+    for series, meta in SERIES_META.items():
+        if model_upper.startswith(meta['prefix']):
+            return meta
+
+    # Default to Catalyst 1300 behavior unless explicitly overridden.
+    return SERIES_META.get(default_series, SERIES_META['1300'])
 
 def create_interfaces(row):
     """
@@ -187,7 +222,7 @@ def create_console_ports(row):
             })
     return console_ports
 
-def main(csv_filename='models.csv'):
+def main(csv_filename='models.csv', default_series='1300'):
     with open(csv_filename, newline='', encoding='utf-8') as f:
         reader = csv.DictReader(f)
         for row in reader:
@@ -198,8 +233,10 @@ def main(csv_filename='models.csv'):
 
             filename = model.upper()
 
-            # this is the convention used in other cisco catalyst models on device type library for the name only
-            model = model.replace("C1300", "Catalyst 1300")
+            series_meta = get_series_metadata(model, default_series)
+
+            # Keep Cisco device type naming convention in NetBox device-type library.
+            model = model.replace(series_meta['prefix'], series_meta['label'])
 
             weight_lbs = float(row['Weight (pounds)'])
 
@@ -216,7 +253,7 @@ def main(csv_filename='models.csv'):
                 'is_full_depth': False,
                 'front_image': False,
                 'rear_image': False,
-                'comments': '[Catalyst 1300 Datasheet](https://www.cisco.com/c/en/us/products/collateral/switches/catalyst-1300-series-switches/nb-06-cat1300-ser-data-sheet-cte-en.html)',
+                'comments': f"[{series_meta['label']} Datasheet]({series_meta['datasheet_url']})",
                 'weight': weight_lbs,
                 'weight_unit': 'lb',
                 'interfaces': create_interfaces(row),
@@ -253,4 +290,20 @@ def main(csv_filename='models.csv'):
             print(f"Generated {out_filename}")
 
 if __name__ == "__main__":
-    main()
+    parser = argparse.ArgumentParser(
+        description='Generate NetBox device type YAML from models.csv for Catalyst 1200/1300 and CBS250/CBS350.'
+    )
+    parser.add_argument(
+        '--csv',
+        default='models.csv',
+        help='Path to the input CSV file (default: models.csv).'
+    )
+    parser.add_argument(
+        '--default-series',
+        choices=['1200', '1300', 'cbs250', 'cbs350'],
+        default='1300',
+        help='Fallback series when model prefix is not recognized (default: 1300).'
+    )
+
+    args = parser.parse_args()
+    main(csv_filename=args.csv, default_series=args.default_series)

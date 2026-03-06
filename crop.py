@@ -39,7 +39,7 @@ def enforce_10_to_1_aspect(img):
         img = img.convert("RGBA")
 
     width, height = img.size
-    target_width = int(9.8 * height)  # Because aspect ratio is 10:1
+    target_width = int(10 * height)  # Exact 10:1 aspect ratio
 
     # Create a new image in "RGB" with a white background
     #   for the final output (since we want white padding).
