@@ -4,6 +4,9 @@ import csv
 import re
 import os
 import argparse
+import html
+import urllib.request
+import urllib.error
 
 try:
     import yaml
@@ -53,6 +56,47 @@ SERIES_META = {
 }
 
 
+FANLESS_KEYWORDS = [
+    'FANLESS',
+    'NO FAN',
+    'WITHOUT FAN',
+]
+
+FAN_KEYWORDS = [
+    'FAN',
+    'FANS',
+    'COOLING FAN',
+    'VARIABLE SPEED FAN',
+]
+
+DIRECTION_KEYWORDS = {
+    'front-to-rear': [
+        'FRONT-TO-REAR',
+        'FRONT TO REAR',
+        'FRONT-TO-BACK',
+        'FRONT TO BACK',
+    ],
+    'rear-to-front': [
+        'REAR-TO-FRONT',
+        'REAR TO FRONT',
+        'BACK-TO-FRONT',
+        'BACK TO FRONT',
+    ],
+    'left-to-right': [
+        'LEFT-TO-RIGHT',
+        'LEFT TO RIGHT',
+    ],
+    'right-to-left': [
+        'RIGHT-TO-LEFT',
+        'RIGHT TO LEFT',
+    ],
+    'side-to-rear': [
+        'SIDE-TO-REAR',
+        'SIDE TO REAR',
+    ],
+}
+
+
 def get_series_metadata(model, default_series='1300'):
     model_upper = model.upper()
     for series, meta in SERIES_META.items():
@@ -61,6 +105,99 @@ def get_series_metadata(model, default_series='1300'):
 
     # Default to Catalyst 1300 behavior unless explicitly overridden.
     return SERIES_META.get(default_series, SERIES_META['1300'])
+
+
+def fetch_datasheet_text(url, cache):
+    """
+    Fetch datasheet HTML and return a normalized uppercase plain-text body.
+    Results are cached per URL to avoid repeated network calls.
+    """
+    if url in cache:
+        return cache[url]
+
+    try:
+        request = urllib.request.Request(
+            url,
+            headers={
+                'User-Agent': 'Mozilla/5.0 (compatible; cisco-devicetype-generator/1.0)'
+            },
+        )
+        with urllib.request.urlopen(request, timeout=20) as response:
+            body = response.read().decode('utf-8', errors='ignore')
+    except (urllib.error.URLError, TimeoutError, ValueError):
+        cache[url] = ''
+        return ''
+
+    body = re.sub(r'(?is)<script.*?>.*?</script>', ' ', body)
+    body = re.sub(r'(?is)<style.*?>.*?</style>', ' ', body)
+    body = re.sub(r'(?is)<[^>]+>', ' ', body)
+    body = html.unescape(body)
+    body = re.sub(r'\s+', ' ', body).strip().upper()
+
+    cache[url] = body
+    return body
+
+
+def model_variants(model):
+    """Return model string variants commonly present in datasheet tables/text."""
+    base = model.upper()
+    variants = {
+        base,
+        base.replace('-', ' '),
+        base.replace('-', ''),
+    }
+    return [v for v in variants if v]
+
+
+def extract_model_contexts(text, model, context_window=220):
+    """Extract nearby text windows around model references."""
+    contexts = []
+    for variant in model_variants(model):
+        start = 0
+        while True:
+            idx = text.find(variant, start)
+            if idx == -1:
+                break
+            left = max(0, idx - context_window)
+            right = min(len(text), idx + len(variant) + context_window)
+            contexts.append(text[left:right])
+            start = idx + len(variant)
+
+    return contexts
+
+
+def infer_airflow_from_datasheet(model, datasheet_url, cache):
+    """
+    Determine airflow from Cisco datasheet text.
+
+    Rules:
+      1) If model context includes fanless terms => passive.
+      2) If model context includes explicit airflow direction => that direction.
+      3) If model context includes fan references => front-to-rear.
+      4) If not found/ambiguous => None (caller applies fallback).
+    """
+    text = fetch_datasheet_text(datasheet_url, cache)
+    if not text:
+        return None
+
+    contexts = extract_model_contexts(text, model)
+    if not contexts:
+        return None
+
+    for context in contexts:
+        if any(keyword in context for keyword in FANLESS_KEYWORDS):
+            return 'passive'
+
+    for context in contexts:
+        for direction, keywords in DIRECTION_KEYWORDS.items():
+            if any(keyword in context for keyword in keywords):
+                return direction
+
+    for context in contexts:
+        if any(keyword in context for keyword in FAN_KEYWORDS):
+            return 'front-to-rear'
+
+    return None
 
 def create_interfaces(row):
     """
@@ -223,6 +360,8 @@ def create_console_ports(row):
     return console_ports
 
 def main(csv_filename='models.csv', default_series='1300'):
+    datasheet_cache = {}
+
     with open(csv_filename, newline='', encoding='utf-8') as f:
         reader = csv.DictReader(f)
         for row in reader:
@@ -243,6 +382,15 @@ def main(csv_filename='models.csv', default_series='1300'):
             # Draw is in watts
             max_draw = int(round(float(row['Draw'])))
 
+            airflow = infer_airflow_from_datasheet(
+                part_number,
+                series_meta['datasheet_url'],
+                datasheet_cache,
+            )
+            if airflow is None:
+                airflow = 'front-to-rear'
+                print(f"Warning: airflow not found in datasheet for {part_number}. Using fallback '{airflow}'.")
+
             # Build the device dictionary
             device_dict = {
                 'manufacturer': 'Cisco',
@@ -253,6 +401,7 @@ def main(csv_filename='models.csv', default_series='1300'):
                 'is_full_depth': False,
                 'front_image': False,
                 'rear_image': False,
+                'airflow': airflow,
                 'comments': f"[{series_meta['label']} Datasheet]({series_meta['datasheet_url']})",
                 'weight': weight_lbs,
                 'weight_unit': 'lb',

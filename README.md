@@ -20,6 +20,10 @@ python generate.py --csv models.csv
 
 `generate.py` auto-detects model series by prefix (`C1200` / `C1300`) and defaults to Catalyst 1300 behavior for unknown prefixes.
 
+`generate.py` now fetches Cisco datasheet pages and tries to infer `airflow` per model.
+If the model context in the datasheet indicates fanless/no-fan, it sets `airflow: passive`.
+If fan information is found without an explicit direction, it defaults to `front-to-rear`.
+
 Supported model prefixes include `C1200`, `C1300`, `C1300X`, `CBS250`, and `CBS350`.
 
 Normalize elevation PNG images to a 10:1 aspect ratio:
