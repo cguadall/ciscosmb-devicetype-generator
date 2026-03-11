@@ -8,7 +8,7 @@ is_full_depth: false
 front_image: false
 rear_image: false
 airflow: front-to-rear
-comments: '[CBS250 Datasheet](https://www.cisco.com/c/en/us/products/collateral/switches/business-250-series-smart-switches/cbs250-ds.html)'
+comments: '[CBS250 Datasheet](https://www.cisco.com/c/en/us/products/collateral/switches/business-250-series-smart-switches/nb-06-bus250-smart-switch-ds-cte-en.html)'
 weight: 5.25
 weight_unit: lb
 interfaces:

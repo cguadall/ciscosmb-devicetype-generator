@@ -7,7 +7,7 @@ u_height: 1.0
 is_full_depth: false
 front_image: true
 rear_image: false
-airflow: passive
+airflow: front-to-rear
 comments: '[Catalyst 1200 Datasheet](https://www.cisco.com/c/en/us/products/collateral/switches/catalyst-1200-series-switches/nb-06-cat1200-ser-data-sheet-cte-en.html)'
 weight: 11.97
 weight_unit: lb

@@ -8,7 +8,7 @@ is_full_depth: false
 front_image: false
 rear_image: false
 airflow: front-to-rear
-comments: '[CBS350 Datasheet](https://www.cisco.com/c/en/us/products/collateral/switches/business-350-series-managed-switches/cbs350-ds.html)'
+comments: '[CBS350 Datasheet](https://www.cisco.com/c/en/us/products/collateral/switches/business-350-series-managed-switches/datasheet-c78-744156.html)'
 weight: 12.83
 weight_unit: lb
 interfaces:
