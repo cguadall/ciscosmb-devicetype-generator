@@ -1,8 +1,8 @@
 ---
 manufacturer: Cisco
-model: SX550X-12F-K9
-slug: cisco-sx550x-12f-k9
-part_number: SX550X-12F-K9
+model: SX550X-12F
+slug: cisco-sx550x-12f
+part_number: SX550X-12F
 u_height: 1.0
 is_full_depth: false
 front_image: false

@@ -1,8 +1,8 @@
 ---
 manufacturer: Cisco
-model: SG550X-24-K9
-slug: cisco-sg550x-24-k9
-part_number: SG550X-24-K9
+model: SG550X-24
+slug: cisco-sg550x-24
+part_number: SG550X-24
 u_height: 1.0
 is_full_depth: false
 front_image: false

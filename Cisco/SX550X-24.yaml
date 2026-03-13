@@ -1,15 +1,15 @@
 ---
 manufacturer: Cisco
-model: SG550XG-48T-K9
-slug: cisco-sg550xg-48t-k9
-part_number: SG550XG-48T-K9
+model: SX550X-24
+slug: cisco-sx550x-24
+part_number: SX550X-24
 u_height: 1.0
 is_full_depth: false
 front_image: false
 rear_image: false
 airflow: front-to-rear
 comments: '[550X Series Datasheet](https://www.cisco.com/c/en/us/products/collateral/switches/550x-series-stackable-managed-switches/datasheet-c78-735874.html)'
-weight: 16.38
+weight: 11.38
 weight_unit: lb
 interfaces:
   - name: TenGigabitEthernet1/0/1
@@ -73,100 +73,18 @@ interfaces:
     type: 10gbase-t
     enabled: true
   - name: TenGigabitEthernet1/0/21
-    type: 10gbase-t
-    enabled: true
-  - name: TenGigabitEthernet1/0/22
-    type: 10gbase-t
-    enabled: true
-  - name: TenGigabitEthernet1/0/23
-    type: 10gbase-t
-    enabled: true
-  - name: TenGigabitEthernet1/0/24
-    type: 10gbase-t
-    enabled: true
-  - name: TenGigabitEthernet1/0/25
-    type: 10gbase-t
-    enabled: true
-  - name: TenGigabitEthernet1/0/26
-    type: 10gbase-t
-    enabled: true
-  - name: TenGigabitEthernet1/0/27
-    type: 10gbase-t
-    enabled: true
-  - name: TenGigabitEthernet1/0/28
-    type: 10gbase-t
-    enabled: true
-  - name: TenGigabitEthernet1/0/29
-    type: 10gbase-t
-    enabled: true
-  - name: TenGigabitEthernet1/0/30
-    type: 10gbase-t
-    enabled: true
-  - name: TenGigabitEthernet1/0/31
-    type: 10gbase-t
-    enabled: true
-  - name: TenGigabitEthernet1/0/32
-    type: 10gbase-t
-    enabled: true
-  - name: TenGigabitEthernet1/0/33
-    type: 10gbase-t
-    enabled: true
-  - name: TenGigabitEthernet1/0/34
-    type: 10gbase-t
-    enabled: true
-  - name: TenGigabitEthernet1/0/35
-    type: 10gbase-t
-    enabled: true
-  - name: TenGigabitEthernet1/0/36
-    type: 10gbase-t
-    enabled: true
-  - name: TenGigabitEthernet1/0/37
-    type: 10gbase-t
-    enabled: true
-  - name: TenGigabitEthernet1/0/38
-    type: 10gbase-t
-    enabled: true
-  - name: TenGigabitEthernet1/0/39
-    type: 10gbase-t
-    enabled: true
-  - name: TenGigabitEthernet1/0/40
-    type: 10gbase-t
-    enabled: true
-  - name: TenGigabitEthernet1/0/41
-    type: 10gbase-t
-    enabled: true
-  - name: TenGigabitEthernet1/0/42
-    type: 10gbase-t
-    enabled: true
-  - name: TenGigabitEthernet1/0/43
-    type: 10gbase-t
-    enabled: true
-  - name: TenGigabitEthernet1/0/44
-    type: 10gbase-t
-    enabled: true
-  - name: TenGigabitEthernet1/0/45
-    type: 10gbase-t
-    enabled: true
-  - name: TenGigabitEthernet1/0/46
-    type: 10gbase-t
-    enabled: true
-  - name: TenGigabitEthernet1/0/47
-    type: 10gbase-x-sfpp
-    enabled: true
-  - name: TenGigabitEthernet1/0/48
-    type: 10gbase-x-sfpp
-    enabled: true
-  - name: TenGigabitEthernet1/0/49
-    type: 10gbase-x-sfpp
-    enabled: true
-  - name: TenGigabitEthernet1/0/50
-    type: 10gbase-x-sfpp
-    enabled: true
-  - name: TenGigabitEthernet1/0/51
     type: 10gbase-x-sfpp
     description: SFP+/RJ45 Combo
     enabled: true
-  - name: TenGigabitEthernet1/0/52
+  - name: TenGigabitEthernet1/0/22
+    type: 10gbase-x-sfpp
+    description: SFP+/RJ45 Combo
+    enabled: true
+  - name: TenGigabitEthernet1/0/23
+    type: 10gbase-x-sfpp
+    description: SFP+/RJ45 Combo
+    enabled: true
+  - name: TenGigabitEthernet1/0/24
     type: 10gbase-x-sfpp
     description: SFP+/RJ45 Combo
     enabled: true
@@ -184,4 +102,4 @@ console-ports:
 power-ports:
   - name: PSU0
     type: iec-60320-c14
-    maximum_draw: 264
+    maximum_draw: 125
