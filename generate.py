@@ -73,6 +73,9 @@ VALID_STACKING_VALUES = {'', 'true', 'false'}
 VALID_CONSOLE_TYPES = {'', 'rj-45', 'usb-c', 'usb-a'}
 VALID_POWER_PORT_TYPES = {'', 'dc-terminal', 'iec-60320-c14'}
 
+# Intentionally excluded families. Fast Ethernet 550X (SF550X) is out of scope.
+EXCLUDED_MODEL_PREFIXES = ('SF550X',)
+
 STACKING_MODELS = {
     'C1300-16P-4X',
     'C1300-24T-4X',
@@ -287,6 +290,24 @@ SERIES_META = {
         'prefix': 'CBS350',
         'label': 'CBS350',
         'datasheet_url': 'https://www.cisco.com/c/en/us/products/collateral/switches/business-350-series-managed-switches/datasheet-c78-744156.html',
+    },
+    'sg550x': {
+        'prefix': 'SG550X',
+        'label': '550X Series',
+        'datasheet_url': 'https://www.cisco.com/c/en/us/products/collateral/switches/550x-series-stackable-managed-switches/datasheet-c78-735874.html',
+        'rename_model_prefix': False,
+    },
+    'sg550xg': {
+        'prefix': 'SG550XG',
+        'label': '550X Series',
+        'datasheet_url': 'https://www.cisco.com/c/en/us/products/collateral/switches/550x-series-stackable-managed-switches/datasheet-c78-735874.html',
+        'rename_model_prefix': False,
+    },
+    'sx550x': {
+        'prefix': 'SX550X',
+        'label': '550X Series',
+        'datasheet_url': 'https://www.cisco.com/c/en/us/products/collateral/switches/550x-series-stackable-managed-switches/datasheet-c78-735874.html',
+        'rename_model_prefix': False,
     },
 }
 
@@ -614,6 +635,23 @@ def main(csv_filename='models.csv', default_series='1300'):
     datasheet_cache = {}
 
     rows = normalize_models_csv(csv_filename)
+    excluded_rows = []
+    included_rows = []
+    for row in rows:
+        model = (row.get('Model') or '').strip().upper()
+        if model.startswith(EXCLUDED_MODEL_PREFIXES):
+            excluded_rows.append(model)
+            continue
+        included_rows.append(row)
+
+    if excluded_rows:
+        print(
+            f"Skipping {len(excluded_rows)} excluded Fast Ethernet model(s): "
+            f"{', '.join(excluded_rows)}"
+        )
+
+    rows = included_rows
+
     validate_unique_models(rows)
     validate_row_values(rows)
 
@@ -627,8 +665,9 @@ def main(csv_filename='models.csv', default_series='1300'):
 
         series_meta = get_series_metadata(model, default_series)
 
-        # Keep Cisco device type naming convention in NetBox device-type library.
-        model = model.replace(series_meta['prefix'], series_meta['label'])
+        # Preserve legacy model renaming for Catalyst lines, while keeping 550X part names intact.
+        if series_meta.get('rename_model_prefix', True):
+            model = model.replace(series_meta['prefix'], series_meta['label'])
 
         weight_lbs = float(row['Weight (pounds)'])
 
@@ -687,7 +726,7 @@ def main(csv_filename='models.csv', default_series='1300'):
 
 if __name__ == "__main__":
     parser = argparse.ArgumentParser(
-        description='Generate NetBox device type YAML from models.csv for Catalyst 1200/1300 and CBS250/CBS350.'
+        description='Generate NetBox device type YAML from models.csv for Catalyst 1200/1300, CBS250/CBS350, and 550X families.'
     )
     parser.add_argument(
         '--csv',
@@ -696,7 +735,7 @@ if __name__ == "__main__":
     )
     parser.add_argument(
         '--default-series',
-        choices=['1200', '1300', 'cbs250', 'cbs350'],
+        choices=['1200', '1300', 'cbs250', 'cbs350', 'sg550x', 'sg550xg', 'sx550x'],
         default='1300',
         help='Fallback series when model prefix is not recognized (default: 1300).'
     )

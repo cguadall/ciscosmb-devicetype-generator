@@ -1,5 +1,5 @@
 # ciscosmb-devicetype-generator
-This set of scripts helped me generate device type definitions and images for Cisco Catalyst 1200 and 1300 series switches and Cisco Business CBS250/CBS350 series switches. Generated in part by ChatGPT.
+This set of scripts helped me generate device type definitions and images for Cisco Catalyst 1200 and 1300 series switches, Cisco Business CBS250/CBS350 series switches, and Cisco 550X family switches (SG550X/SG550XG/SX550X). Generated in part by ChatGPT.
 
 These definitions are destined for the [NetBox devicetype-library](https://github.com/netbox-community/devicetype-library)
 
@@ -8,7 +8,7 @@ These scripts can be adapted for other models/manufacturers for bulk creation of
 It consists of
 * `generate.py` -- uses a predefined `models.csv` file to produce templates appropriate for devicetype-library
 * `crop.py` -- a Pillow-based cropping tool to create NetBox-friendly rear and front images from manufacturer images
-* `models.csv` -- input file containing model metadata for both Catalyst 1200 and 1300 series
+* `models.csv` -- input file containing model metadata for Catalyst 1200/1300, CBS250/CBS350, and Cisco 550X families
 
 ## Usage
 
@@ -24,7 +24,7 @@ python generate.py --csv models.csv
 If the model context in the datasheet indicates fanless/no-fan, it sets `airflow: passive`.
 If fan information is found without an explicit direction, it defaults to `front-to-rear`.
 
-Supported model prefixes include `C1200`, `C1300`, `C1300X`, `CBS250`, and `CBS350`.
+Supported model prefixes include `C1200`, `C1300`, `C1300X`, `CBS250`, `CBS350`, `SG550X`, `SG550XG`, and `SX550X`.
 
 Normalize elevation PNG images to a 10:1 aspect ratio:
 
